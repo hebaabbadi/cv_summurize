@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Summarizer</title>
+    <style>
+        :root {
+            --primary: #6a62d2;
+            --primary-light: #8a84d8;
+            --primary-dark: #4b44b5;
+            --secondary: #f8f9fa;
+            --text: #333;
+            --light-gray: #e9ecef;
+            --success: #28a745;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fd;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="text"], 
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--light-gray);
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary-light);
+            outline: none;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed var(--light-gray);
+            border-radius: var(--radius);
+            background: var(--secondary);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary-light);
+            background: #f0f2ff;
+        }
+        
+        .file-upload input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-icon {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .file-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .file-hint {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 500;
+            display: none;
+        }
+        
+        .similarity-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .checkbox-wrapper {
+            display: inline-block;
+            position: relative;
+        }
+        
+        .checkbox-wrapper input {
+            opacity: 0;
+            position: absolute;
+        }
+        
+        .checkmark {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--light-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-wrapper input:checked ~ .checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .checkbox-wrapper input:checked ~ .checkmark:after {
+            display: block;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+        }
+        
+        #result {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            min-height: 100px;
+            box-shadow: var(--shadow);
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .result-visible {
+            display: block !important;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .result-icon {
+            background: #e6f7ee;
+            color: var(--success);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .result-content {
+            line-height: 1.7;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(106, 98, 210, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .file-upload {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>CV Summarizer</h1>
+            <p class="subtitle">Upload your resume and get a professional summary</p>
+            
+            <form id="uploadForm">
+                <h3 class="section-title">Upload Document</h3>
+                <div class="form-group">
+                    <div class="file-upload" id="fileUploadArea">
+                        <div class="file-icon">📄</div>
+                        <p class="file-label">Drag & Drop your CV here</p>
+                        <p class="file-hint">Supports PDF, DOCX and TXT files</p>
+                        <p class="file-name" id="fileName"></p>
+                        <input type="file" id="file" name="file" accept=".pdf,.docx,.txt" required>
+                    </div>
+                </div>
+                
+                <h3 class="section-title">Job Details</h3>
+                <div class="form-group">
+                    <label for="job_role">Target Job Position</label>
+                    <input type="text" id="job_role" name="job_role" placeholder="e.g., Full Stack Developer, Project Manager">
+                </div>
+                
+                <div class="similarity-check">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="check_similarity" name="check_similarity">
+                        <span class="checkmark"></span>
+                    </label>
+                    <label for="check_similarity">Check similarity with job role</label>
+                </div>
+                
+                <button type="submit">Generate Summary</button>
+            </form>
+        </div>
+        
+        <div id="result"></div>
+        
+        <div id="loading" class="loading" style="display:none">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Show selected filename
+        document.getElementById('file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '';
+            const fileNameElement = document.getElementById('fileName');
+            if (fileName) {
+                fileNameElement.textContent = fileName;
+                fileNameElement.style.display = 'block';
+                document.getElementById('fileUploadArea').style.borderColor = 'var(--primary)';
+            } else {
+                fileNameElement.style.display = 'none';
+                document.getElementById('fileUploadArea').style.borderColor = 'var(--light-gray)';
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file');
+            const jobRoleInput = document.getElementById('job_role');
+            const checkSimilarity = document.getElementById('check_similarity');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            // Show loading
+            resultDiv.style.display = 'none';
+            loadingDiv.style.display = 'flex';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('job_role', jobRoleInput.value);
+            formData.append('check_similarity', checkSimilarity.checked);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                loadingDiv.style.display = 'none';
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-icon" style="background:#ffecef;color:#dc3545">❌</div>
+                            <div class="result-title">Error</div>
+                        </div>
+                        <div class="result-content">
+                            ${data.error}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-icon">✓</div>
+                            <div class="result-title">CV Summary</div>
+                        </div>
+                        <div class="result-content">
+                            ${data.summary}
+                        </div>
+                    `;
+                }
+                
+                resultDiv.classList.add('result-visible');
+                resultDiv.style.display = 'block';
+                
+                // Scroll to result
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-icon" style="background:#ffecef;color:#dc3545">❌</div>
+                        <div class="result-title">Error</div>
+                    </div>
+                    <div class="result-content">
+                        An error occurred while processing your request. Please try again.
+                    </div>
+                `;
+                resultDiv.classList.add('result-visible');
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
