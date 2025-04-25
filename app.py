@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import os
 from werkzeug.utils import secure_filename
 from cv_summurizee import extract_text_from_pdf, extract_text_from_docx, extract_text_from_txt, summarize_cv_with_deepseek
-
+  # Add this line
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'

@@ -6,10 +6,13 @@ from docx import Document
 import re
 import os
 from difflib import SequenceMatcher
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))  # Add this line
 # Initialize OpenAI client
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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",  # Replace with your OpenRouter API key
+base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY")
 )
 
 
